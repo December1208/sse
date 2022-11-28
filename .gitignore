@@ -1,0 +1,8 @@
+video-player
+log/*
+.DS_Store
+language-servers/java_language_server/configuration/*.log
+vendor
+.idea
+config/config.yaml
+static/
