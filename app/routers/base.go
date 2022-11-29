@@ -13,10 +13,10 @@ func RegRouters(eng *gin.Engine) {
 
 	v2api := eng.Group("/v2/api")
 	{
-		hls_video.AddApiRouter(v2api)
+		sse.AddApiRouter(v2api)
 	}
 	v2InnerApi := eng.Group("/v2/inner_api")
 	{
-		hls_video.AddInnerApiRouter(v2InnerApi)
+		sse.AddInnerApiRouter(v2InnerApi)
 	}
 }
