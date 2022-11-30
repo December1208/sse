@@ -1,6 +1,7 @@
 package webutil
 
 import (
+	"github.com/gin-contrib/sse"
 	"github.com/go-redis/redis/v8"
 	"net/http"
 	"sse_demo/app/api_error"
@@ -13,10 +14,10 @@ import (
 )
 
 type BaseContext struct {
-	db       *gorm.DB
-	redis    *redis.Client
-	strDatas map[string]string
-	Log      *zap.Logger
+	db      *gorm.DB
+	redis   *redis.Client
+	strData map[string]string
+	Log     *zap.Logger
 }
 
 func NewBaseContext() *BaseContext {
@@ -26,13 +27,13 @@ func NewBaseContext() *BaseContext {
 	return &BaseContext{nil, nil, strData, logger}
 }
 
-func (ctx BaseContext) SetStrVal(key, val string) *BaseContext {
-	ctx.strDatas[key] = val
-	return &ctx
+func (ctx *BaseContext) SetStrVal(key, val string) *BaseContext {
+	ctx.strData[key] = val
+	return ctx
 }
 
-func (ctx BaseContext) GetStrBy(key string) (string, bool) {
-	val, existed := ctx.strDatas["key"]
+func (ctx *BaseContext) GetStrBy(key string) (string, bool) {
+	val, existed := ctx.strData["key"]
 	if !existed {
 		ctx.Log.Warn("try to get by failed: ", zap.String("key", key))
 	}
@@ -45,7 +46,7 @@ func (ctx *BaseContext) SetDB(val *gorm.DB) *BaseContext {
 	return ctx
 }
 
-func (ctx BaseContext) GetDB() *gorm.DB {
+func (ctx *BaseContext) GetDB() *gorm.DB {
 	if ctx.db == nil {
 		panic("db is nil")
 	}
@@ -57,7 +58,7 @@ func (ctx *BaseContext) SetRedis(val *redis.Client) *BaseContext {
 	return ctx
 }
 
-func (ctx BaseContext) GetRedis() *redis.Client {
+func (ctx *BaseContext) GetRedis() *redis.Client {
 
 	return ctx.redis
 }
@@ -81,19 +82,19 @@ func NewContext(c *gin.Context) *MyWebContext {
 	return &MyWebContext{baseContext, c, &util.SentryLog{L: baseContext.Log, Ctx: c}}
 }
 
-func (ctx *MyWebContext) GetUserInfo() *service.AuthCustomClaims {
+func (ctx *MyWebContext) GetUserInfo() *service.User {
 	userInfo, exists := ctx.Get("userInfo")
 	if exists && nil != userInfo {
-		return userInfo.(*service.AuthCustomClaims)
+		return userInfo.(*service.User)
 	}
-	nonameUserInfo := service.AuthCustomClaims{
-		UUID: "",
+	nonameUserInfo := service.User{
+		ID: -1,
 	}
 	return &nonameUserInfo
 }
 
-func (ctx *MyWebContext) SetUserInfo(claims *service.AuthCustomClaims) {
-	ctx.Set("userInfo", claims)
+func (ctx *MyWebContext) SetUserInfo(user *service.User) {
+	ctx.Set("userInfo", user)
 }
 
 func (ctx *MyWebContext) V2JSON(obj interface{}) {
@@ -108,8 +109,8 @@ func (ctx *MyWebContext) V2JSON(obj interface{}) {
 func (ctx *MyWebContext) V2AbortWithError(apiError api_error.APIError) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    apiError.ErrorCode,
-		"detail":  apiError.ErrorMsg,
-		"data":    nil,
+		"message": apiError.ErrorMsg,
+		"result":  nil,
 		"success": false,
 	})
 }
@@ -120,21 +121,9 @@ func (ctx *MyWebContext) V2AbortWithErrorAndMsg(apiError api_error.APIError, msg
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    apiError.ErrorCode,
-		"detail":  msg,
-		"data":    nil,
+		"message": msg,
+		"result":  nil,
 		"success": false,
-	})
-}
-
-func (ctx *MyWebContext) V2AbortWithOldErrorAndMsg(apiError api_error.APIOldError, msg string) {
-	if msg == "" {
-		msg = apiError.ErrorMsg
-	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":  apiError.ErrorCode,
-		"error": map[string]interface{}{"message": msg},
-		"desc":  msg,
-		"data":  nil,
 	})
 }
 
@@ -184,4 +173,14 @@ func (ctx *MyWebContext) V2BindQueryAndValidate(vData interface{}) bool {
 
 func (ctx *MyWebContext) DataResponse(code int, data []byte) {
 	ctx.Data(code, "text/html; charset=utf-8", data)
+}
+
+func (ctx *MyWebContext) SSEResponse(msgType, msg string) error {
+	event := sse.Event{
+		Event: msgType,
+		Data:  msg,
+	}
+	err := event.Render(ctx.Writer)
+	ctx.Writer.WriteHeaderNow()
+	return err
 }

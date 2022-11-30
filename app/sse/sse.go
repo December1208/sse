@@ -1,6 +1,7 @@
-package sse
+package sse_server
 
 import (
+	"sse_demo/util"
 	"sync"
 	"time"
 )
@@ -18,47 +19,68 @@ type Portal struct {
 }
 
 type Channel struct {
-	Key   string
-	users []*User
+	Key     string
+	clients map[string]*Client
 
-	userMux sync.Mutex
+	ClientMux sync.Mutex
+	portal    *Portal
 }
 
-type User struct {
+type Client struct {
 	MessageChan chan string
-	UserId      int
+	ClientId    string
+
+	channel *Channel
 }
 
 func (channel *Channel) PublishMsg(msg string) {
+
+	if len(channel.clients) == 0 {
+		return
+	}
+
 	wg := sync.WaitGroup{}
-	wg.Add(len(channel.users) - 1)
-	for i := 0; i < len(channel.users); i++ {
-		go func(u *User) {
+	wg.Add(len(channel.clients))
+
+	for _, v := range channel.clients {
+		go func(c *Client) {
 			select {
-			case u.MessageChan <- msg:
-			case <-time.After(1):
-				channel.removeUser(u)
+			case c.MessageChan <- msg:
+				util.MyLogger.Info("sent msg: " + msg)
+			case <-time.After(time.Second * 5):
+				channel.removeClient(c)
 			}
 			wg.Done()
-		}(channel.users[i])
-
+		}(v)
 	}
 }
 
-func (channel *Channel) removeUser(user *User) {
-	channel.userMux.Lock()
-	defer channel.userMux.Unlock()
+func (channel *Channel) removeClient(client *Client) {
+	channel.ClientMux.Lock()
+	defer channel.ClientMux.Unlock()
 
-	for i := 0; i < len(channel.users); i++ {
-		u := channel.users[i]
-		if u == user {
-			channel.users = append(channel.users[:i], channel.users[i+1:]...)
-			i--
-		}
-	}
-	if len(channel.users) == 0 {
+	delete(channel.clients, client.ClientId)
+	close(client.MessageChan)
 
-	}
+	// do not delete
+	//if len(channel.clients) == 0 {
+	//	channel.portal.removeChannel(channel)
+	//}
+}
+
+func (channel *Channel) Subscribe(client *Client) {
+	channel.ClientMux.Lock()
+	defer channel.ClientMux.Unlock()
+
+	channel.clients[client.ClientId] = client
+	println(len(channel.clients))
+}
+
+func (p *Portal) removeChannel(channel *Channel) {
+	p.channelMux.Lock()
+	defer p.channelMux.Unlock()
+
+	delete(p.Channels, channel.Key)
 }
 
 func (p *Portal) loop() {
@@ -82,10 +104,13 @@ func GetOrCreateChannel(channelKey string) *Channel {
 
 	channel, ok := portalInstance.Channels[channelKey]
 	if !ok {
+		println("init channel " + channelKey)
 		channel = &Channel{
-			Key:   channelKey,
-			users: make([]*User, 0),
+			Key:     channelKey,
+			clients: make(map[string]*Client),
+			portal:  portalInstance,
 		}
+		portalInstance.Channels[channelKey] = channel
 	}
 	return channel
 }
@@ -100,7 +125,8 @@ func init() {
 		PubMessageChan: make(chan PubMessage),
 		Channels:       make(map[string]*Channel),
 	}
-	println("init")
+	go PortalInstance.loop()
+	println("init portalInstance")
 }
 
 var PortalInstance *Portal

@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"fmt"
-	"strings"
 	"sse_demo/app/webutil"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -37,6 +37,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			if _, ok := allowHosts["localhost"]; ok {
 				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 			}
+			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 		}
 		if _, ok := allowHosts[curHost]; ok {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)

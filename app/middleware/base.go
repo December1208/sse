@@ -8,7 +8,7 @@ type MyContext struct {
 
 func RegMiddleware(eng *gin.Engine) {
 	eng.Use(CORSMiddleware())
-	eng.Use(DBMiddleware())
-	eng.Use(JwtMiddleware())
-	eng.Use(RedisMiddleware())
+	//eng.Use(DBMiddleware())
+	eng.Use(LoadUserMiddleware())
+	//eng.Use(RedisMiddleware())
 }

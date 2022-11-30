@@ -1,11 +1,10 @@
 package middleware
 
 import (
-	"github.com/go-redis/redis/v8"
-	"sse_demo/database"
-
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
+	"sse_demo/database"
 )
 
 func NewRedis() *redis.Client {
