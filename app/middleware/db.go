@@ -20,10 +20,6 @@ func NewRedis() *redis.Client {
 		Password: pwd,     // no password set
 		DB:       redisDB, // use default DB
 	})
-
-	// pong, err := rdb.Ping(ctx).Result()
-	// fmt.Println(pong, err)
-	// Output: PONG <nil>
 	return rdb
 }
 

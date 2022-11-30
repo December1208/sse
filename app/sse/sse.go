@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+const (
+	BroadcastChannelKey = "broadcast_sse_channel"
+)
+
 type PubMessage struct {
 	ChannelKey string
 	Message    string
@@ -61,7 +65,6 @@ func (channel *Channel) removeClient(client *Client) {
 
 	delete(channel.clients, client.ClientId)
 	close(client.MessageChan)
-
 	// do not delete
 	//if len(channel.clients) == 0 {
 	//	channel.portal.removeChannel(channel)
@@ -73,7 +76,6 @@ func (channel *Channel) Subscribe(client *Client) {
 	defer channel.ClientMux.Unlock()
 
 	channel.clients[client.ClientId] = client
-	println(len(channel.clients))
 }
 
 func (p *Portal) removeChannel(channel *Channel) {

@@ -16,7 +16,7 @@ func getConfigAllowHosts() map[string]bool {
 		return globalAllowHosts
 	}
 	globalAllowHosts = make(map[string]bool)
-	allowHosts := viper.GetStringSlice("cors.allowhosts")
+	allowHosts := viper.GetStringSlice("cors.allow_hosts")
 	for _, allowHost := range allowHosts {
 		globalAllowHosts[allowHost] = true
 	}
@@ -37,7 +37,6 @@ func CORSMiddleware() gin.HandlerFunc {
 			if _, ok := allowHosts["localhost"]; ok {
 				c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 			}
-			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 		}
 		if _, ok := allowHosts[curHost]; ok {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
