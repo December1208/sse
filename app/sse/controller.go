@@ -33,8 +33,6 @@ func (s Controller) Subscribe(c *gin.Context) {
 	suc := c.Stream(func(w io.Writer) bool {
 		if msg, ok := <-client.MessageChan; ok {
 			c.SSEvent("message", msg)
-			ctx.Writer.CloseNotify()
-			util.MyLogger.Info("rec msg: " + msg)
 			return true
 		}
 		return false
