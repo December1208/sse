@@ -7,7 +7,6 @@ import (
 	"io"
 	"sse_demo/app/webutil"
 	"sse_demo/util"
-	"time"
 )
 
 type Controller struct{}
@@ -49,39 +48,6 @@ func (s Controller) Subscribe(c *gin.Context) {
 	//	channel.removeClient(client)
 	//	return
 	//}
-}
-
-func (s Controller) monitor(c *gin.Context) {
-	ctx := webutil.NewContext(c)
-	type Query struct {
-		Interval int `form:"interval"`
-		span     int `form:"span"`
-	}
-	var query Query
-	if result := ctx.V2BindQueryAndValidate(&query); !result {
-		return
-	}
-
-	channel := GetOrCreateChannel(BroadcastChannelKey)
-	client := &Client{
-		ClientId:    uuid.New().String(),
-		MessageChan: make(chan string),
-		channel:     channel,
-	}
-	channel.Subscribe(client)
-	util.MyLogger.Info("connection open", zap.String("client_id", client.ClientId))
-	// get full data
-	suc := c.Stream(func(w io.Writer) bool {
-		msg := GetFullMonitorData(query.Interval, query.span)
-		c.SSEvent("message", msg)
-		time.Sleep(time.Duration(query.Interval) * time.Second)
-
-		return true
-	})
-	if suc {
-		channel.removeClient(client)
-		util.MyLogger.Info("connection closed", zap.String("client_id", client.ClientId))
-	}
 }
 
 func AddInnerApiRouter(router *gin.RouterGroup) {

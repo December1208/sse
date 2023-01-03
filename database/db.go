@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var dbInstance *gorm.DB
+var db *gorm.DB
 
 func init() {
 	util.MyLogger.Info("begin init sse_demo")
@@ -28,18 +28,18 @@ func init() {
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbName)
 	// util.MyLogger.Info(postgresConfig)
-	db, err := gorm.Open("postgres", postgresConfig)
+	dbInstance, err := gorm.Open("postgres", postgresConfig)
 	if err != nil {
 		util.MyLogger.Error(err.Error())
 		panic("DB Error")
 	}
 	util.MyLogger.Info("connect success")
 	//db.SetLogger(util.MyLogger)
-	db.Callback().Update().Remove("gorm:update_time_stamp")
-	dbInstance = db
+	dbInstance.Callback().Update().Remove("gorm:update_time_stamp")
+	db = dbInstance
 	util.MyLogger.Info("db init complete")
 }
 
 func GetDatabase() *gorm.DB {
-	return dbInstance
+	return db
 }
