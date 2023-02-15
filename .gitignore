@@ -5,4 +5,4 @@ language-servers/java_language_server/configuration/*.log
 vendor
 .idea
 static/
-config.yaml
+config.yml

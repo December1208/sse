@@ -36,10 +36,10 @@ func (s Controller) Subscribe(c *gin.Context) {
 		select {
 		case msg := <-client.MessageChan:
 			c.SSEvent("message", msg)
-			return true
 		default:
-			return true
+			// ignore
 		}
+		return true
 	})
 	channel.removeClient(client)
 	util.MyLogger.Info("connection closed", zap.String("client_id", client.ClientId))
@@ -59,6 +59,10 @@ func (s Controller) Publish(c *gin.Context) {
 	if result := ctx.V2BindJsonAndValidate(&vData); !result {
 		return
 	}
+	if vData.Channel == "" || vData.Message == "" {
+		ctx.V2AbortWithError(api_error.InvalidParam)
+		return
+	}
 	channel, ok := PortalInstance.Channels[vData.Channel]
 	if !ok {
 		ctx.V2AbortWithError(api_error.InvalidParam)
@@ -75,5 +79,5 @@ func AddInnerApiRouter(router *gin.RouterGroup) {
 func AddApiRouter(router *gin.RouterGroup) {
 	controller := new(Controller)
 	router.GET("/stream", controller.Subscribe)
-	router.GET("/publish", controller.Publish)
+	router.POST("/publish", controller.Publish)
 }
