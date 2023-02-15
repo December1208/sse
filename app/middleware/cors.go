@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"fmt"
-	"strings"
 	"sse_demo/app/webutil"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -16,7 +16,7 @@ func getConfigAllowHosts() map[string]bool {
 		return globalAllowHosts
 	}
 	globalAllowHosts = make(map[string]bool)
-	allowHosts := viper.GetStringSlice("cors.allowhosts")
+	allowHosts := viper.GetStringSlice("cors.allow_hosts")
 	for _, allowHost := range allowHosts {
 		globalAllowHosts[allowHost] = true
 	}

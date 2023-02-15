@@ -5,7 +5,6 @@ import (
 	"runtime/debug"
 	"sse_demo/app/middleware"
 	"sse_demo/app/routers"
-	"sse_demo/app/sse"
 	"sse_demo/app/webutil"
 	"sse_demo/util"
 	"time"
@@ -54,9 +53,5 @@ func main() {
 			util.MyLogger.Info(string(debug.Stack()))
 		}
 	}()
-
-	portal := sse.GetPortalInstance()
-	println(len(portal.Channels))
-
 	ServerInit()
 }

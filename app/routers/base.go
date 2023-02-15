@@ -13,10 +13,10 @@ func RegRouters(eng *gin.Engine) {
 
 	v2api := eng.Group("/v2/api")
 	{
-		sse.AddApiRouter(v2api)
+		sse_server.AddApiRouter(v2api)
 	}
 	v2InnerApi := eng.Group("/v2/inner_api")
 	{
-		sse.AddInnerApiRouter(v2InnerApi)
+		sse_server.AddInnerApiRouter(v2InnerApi)
 	}
 }
