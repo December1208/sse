@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"runtime/debug"
 	"sse_demo/app/middleware"
 	"sse_demo/app/routers"
@@ -15,8 +17,9 @@ import (
 func ServerInit() {
 	gin.SetMode(gin.ReleaseMode)
 	r := createEng()
-	util.MyLogger.Info("try to start listen on 8855")
-	err := r.Run(":8855")
+	port := viper.GetString("server.port")
+	util.MyLogger.Info("try to start listen on port.", zap.String("port", port))
+	err := r.Run(":" + port)
 	if err != nil {
 		panic(err.Error())
 	}
