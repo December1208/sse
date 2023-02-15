@@ -3,7 +3,7 @@ package database
 import (
 	"github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
-	"sse_demo/util"
+	"sse/util"
 )
 
 var rdb *redis.Client

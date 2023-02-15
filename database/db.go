@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"sse_demo/util"
+	"sse/util"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -12,7 +12,7 @@ import (
 var db *gorm.DB
 
 func init() {
-	util.MyLogger.Info("begin init sse_demo")
+	util.MyLogger.Info("begin init sse")
 	dbInfo := viper.GetStringMapString("db")
 	if len(dbInfo) == 0 {
 		return

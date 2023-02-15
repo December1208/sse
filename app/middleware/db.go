@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"sse_demo/database"
+	"sse/database"
 )
 
 func DBMiddleware() gin.HandlerFunc {

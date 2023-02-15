@@ -4,9 +4,9 @@ import (
 	"github.com/gin-contrib/sse"
 	"github.com/go-redis/redis/v8"
 	"net/http"
-	"sse_demo/app/api_error"
-	"sse_demo/service"
-	"sse_demo/util"
+	"sse/app/api_error"
+	"sse/service"
+	"sse/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"

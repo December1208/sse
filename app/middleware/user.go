@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"sse_demo/app/webutil"
-	"sse_demo/service"
+	"sse/app/webutil"
+	"sse/service"
 )
 
 func LoadUserMiddleware() gin.HandlerFunc {

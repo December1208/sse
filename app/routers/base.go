@@ -2,8 +2,8 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"sse_demo/app/demo"
-	"sse_demo/app/sse"
+	"sse/app/demo"
+	sse_server "sse/app/sse"
 )
 
 func RegRouters(eng *gin.Engine) {

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"fmt"
-	"sse_demo/app/webutil"
+	"sse/app/webutil"
 	"strings"
 
 	"github.com/gin-gonic/gin"

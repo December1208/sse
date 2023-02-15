@@ -1,7 +1,7 @@
 package sse_server
 
 import (
-	"sse_demo/util"
+	"sse/util"
 	"sync"
 	"time"
 )

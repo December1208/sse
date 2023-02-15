@@ -5,9 +5,9 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"io"
-	"sse_demo/app/api_error"
-	"sse_demo/app/webutil"
-	"sse_demo/util"
+	"sse/app/api_error"
+	"sse/app/webutil"
+	"sse/util"
 )
 
 type Controller struct{}
