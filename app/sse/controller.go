@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"io"
+	"sse_demo/app/api_error"
 	"sse_demo/app/webutil"
 	"sse_demo/util"
 )
@@ -31,7 +32,7 @@ func (s Controller) Subscribe(c *gin.Context) {
 	channel.Subscribe(client)
 
 	util.MyLogger.Info("connection open", zap.String("client_id", client.ClientId))
-	suc := c.Stream(func(w io.Writer) bool {
+	_ = c.Stream(func(w io.Writer) bool {
 		select {
 		case msg := <-client.MessageChan:
 			c.SSEvent("message", msg)
@@ -40,14 +41,31 @@ func (s Controller) Subscribe(c *gin.Context) {
 			return true
 		}
 	})
-	if suc {
-		channel.removeClient(client)
-		util.MyLogger.Info("connection closed", zap.String("client_id", client.ClientId))
-	}
+	channel.removeClient(client)
+	util.MyLogger.Info("connection closed", zap.String("client_id", client.ClientId))
 	//if err != nil {
 	//	channel.removeClient(client)
 	//	return
 	//}
+}
+
+func (s Controller) Publish(c *gin.Context) {
+	ctx := webutil.NewContext(c)
+	type reqJson struct {
+		Channel string `json:"channel"`
+		Message string `json:"message"`
+	}
+	var vData reqJson
+	if result := ctx.V2BindJsonAndValidate(&vData); !result {
+		return
+	}
+	channel, ok := PortalInstance.Channels[vData.Channel]
+	if !ok {
+		ctx.V2AbortWithError(api_error.InvalidParam)
+		return
+	}
+	channel.PublishMsg(vData.Message)
+	ctx.V2JSON("ok")
 }
 
 func AddInnerApiRouter(router *gin.RouterGroup) {
@@ -57,5 +75,5 @@ func AddInnerApiRouter(router *gin.RouterGroup) {
 func AddApiRouter(router *gin.RouterGroup) {
 	controller := new(Controller)
 	router.GET("/stream", controller.Subscribe)
-	router.GET("/monitor")
+	router.GET("/publish", controller.Publish)
 }

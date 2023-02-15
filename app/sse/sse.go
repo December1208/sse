@@ -94,7 +94,7 @@ func (p *Portal) loop() {
 			if !ok {
 				break
 			}
-			channel.PublishMsg(pubMsg.Message)
+			go channel.PublishMsg(pubMsg.Message)
 		}
 	}
 }
