@@ -9,6 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.3.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/imroc/req v0.3.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/spf13/viper v1.14.0

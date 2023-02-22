@@ -3,6 +3,7 @@ package sse_server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 	"io"
 	"sse/app/api_error"
@@ -72,6 +73,34 @@ func (s Controller) Publish(c *gin.Context) {
 	ctx.V2JSON("ok")
 }
 
+func (s Controller) Connect(c *gin.Context) {
+	//升级get请求为webSocket协议
+	upgrade := &websocket.Upgrader{
+		ReadBufferSize:    0,
+		EnableCompression: false,
+	}
+	ws, err := upgrade.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		return
+	}
+	defer ws.Close()
+	for {
+		//读取ws中的数据
+		mt, message, err := ws.ReadMessage()
+		if err != nil {
+			break
+		}
+		if string(message) == "ping" {
+			message = []byte("pong")
+		}
+		//写入ws数据
+		err = ws.WriteMessage(mt, message)
+		if err != nil {
+			break
+		}
+	}
+}
+
 func AddInnerApiRouter(router *gin.RouterGroup) {
 
 }
@@ -80,4 +109,5 @@ func AddApiRouter(router *gin.RouterGroup) {
 	controller := new(Controller)
 	router.GET("/stream", controller.Subscribe)
 	router.POST("/publish", controller.Publish)
+	router.GET("/connection", controller.Connect)
 }
